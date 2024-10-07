@@ -43,11 +43,7 @@ export type ResultOf<CSchema extends ClientSchema, PType extends ProcedureType, 
   PType
 >[PName]["result"];
 
-export type ProcedureResult<CSchema extends ClientSchema, PType extends ProcedureType, PName extends keyof SchemaBasedOnType<CSchema, PType>> = {
-  ok: boolean;
-  data?: ResultOf<CSchema, PType, PName>;
-  error?: unknown;
-}
+export type ProcedureResult<CSchema extends ClientSchema, PType extends ProcedureType, PName extends keyof SchemaBasedOnType<CSchema, PType>> = ResultOf<CSchema, PType, PName>
 
 export type RawCallOpts<CSchema extends ClientSchema, PType extends ProcedureType, PName extends keyof SchemaBasedOnType<CSchema, PType>> = {
   name: PName;
@@ -90,11 +86,7 @@ export type Schema = {
             };
         };
         "sign-up": {
-            result: {
-                user_id: number;
-                username: string;
-                created_at: number;
-            };
+            result: void;
             payload: {
                 username: string;
                 password: string;
@@ -240,39 +232,34 @@ class Client<CSchema extends ClientSchema = Schema> {
       };
 
       const response = await this.clientFn(url, requestOpts);
+
       if (!response.ok) {
-        // If the response has a JSON body, try to parse it and get the error message since it is likely a robin error
+        let err: unknown = `Failed to call procedure \`${String(opts.name)}\` with status code ${response.status}`;
+
+        // Attempt to parse the response body as JSON to extract the error message
         try {
           const data = (await response.json()) as ServerResponse<ResultOf<CSchema, PType, PName>>;
-
-          if(!data) {
-            // Proceed to the unhappy throw path
-            throw new Error("No data returned from server");
+          if(!!data && data?.error) {
+            err = data?.error;
           }
-
-          // `ok` will most definitely be false here, but we still check it here as a guard if using the Union result type
-          if(!data.ok) {
-            return { ok: false, error: data?.error };
-          }
-        } catch (e) {
-          // Ignore any errors here
+        } catch(_e: unknown) {
+          /* Ignore errors here and just throw anyway */
         }
-
-        throw new ProcedureCallError(`Failed to call procedure \`${String(opts.name)}\` with status code ${response.status}`, String(opts.name));
+        throw new ProcedureCallError(err, String(opts.name));
       }
 
       const data = (await response.json()) as ServerResponse<ResultOf<CSchema, PType, PName>>;
       if (!data.ok) {
-        return { ok: false, error: data?.error || "An unknown error occurred" };
+        throw new ProcedureCallError(data?.error || "An unknown error occurred", String(opts.name)); 
       }
 
-      return { ok: true, data: data?.data as ResultOf<CSchema, PType, PName> };
-    } catch (e) {
+      return data?.data as ResultOf<CSchema, PType, PName>;
+    } catch (e: unknown) {
       if (e instanceof ProcedureCallError) {
         throw e;
       }
 
-      const message = Object.prototype.hasOwnProperty.call(e, "message") ? (e as any).message : "An unknown error occurred";
+      const message = Object.prototype.hasOwnProperty.call(e, "message") ? (e as {message: unknown}).message : "An unknown error occurred";
       throw new ProcedureCallError(message, String(opts.name), e as Error);
     }
   }
@@ -330,7 +317,7 @@ export class ProcedureCallError extends Error {
   // The previous error that caused this error, if any
   public previousError: Error | null;
 
-  public constructor(message: any, procedureName: string, originalError: Error | null = null) {
+  public constructor(message: unknown, procedureName: string, originalError: Error | null = null) {
     super(typeof message === "string" ? message : "A procedure call error occurred, see the `details` property for more information");
     this.name = "ProcedureCallError";
     this.details = message;

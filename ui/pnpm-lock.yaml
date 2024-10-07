@@ -17,6 +17,12 @@ importers:
       solid-js:
         specifier: ^1.9.1
         version: 1.9.1
+      solid-toast:
+        specifier: ^0.5.0
+        version: 0.5.0(solid-js@1.9.1)
+      tailwind-merge:
+        specifier: ^2.5.3
+        version: 2.5.3
     devDependencies:
       '@types/node':
         specifier: ^22.7.4
@@ -1014,6 +1020,11 @@ packages:
     peerDependencies:
       solid-js: ^1.3
 
+  solid-toast@0.5.0:
+    resolution: {integrity: sha512-t770JakjyS2P9b8Qa1zMLOD51KYKWXbTAyJePVUoYex5c5FH5S/HtUBUbZAWFcqRCKmAE8KhyIiCvDZA8bOnxQ==}
+    peerDependencies:
+      solid-js: ^1.5.4
+
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
@@ -1053,6 +1064,9 @@ packages:
 
   symbol-tree@3.2.4:
     resolution: {integrity: sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==}
+
+  tailwind-merge@2.5.3:
+    resolution: {integrity: sha512-d9ZolCAIzom1nf/5p4LdD5zvjmgSxY0BGgdSvmXIoMYAiPdAW/dSpP7joCDYFY7r/HkEa2qmPtkgsu0xjQeQtw==}
 
   tailwindcss@3.4.13:
     resolution: {integrity: sha512-KqjHOJKogOUt5Bs752ykCeiwvi0fKVkr5oqsFNt/8px/tA8scFPIlkygsf6jXrfCqGHz7VflA6+yytWuM+XhFw==}
@@ -2141,6 +2155,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  solid-toast@0.5.0(solid-js@1.9.1):
+    dependencies:
+      solid-js: 1.9.1
+
   source-map-js@1.2.1: {}
 
   string-width@4.2.3:
@@ -2184,6 +2202,8 @@ snapshots:
   supports-preserve-symlinks-flag@1.0.0: {}
 
   symbol-tree@3.2.4: {}
+
+  tailwind-merge@2.5.3: {}
 
   tailwindcss@3.4.13:
     dependencies:

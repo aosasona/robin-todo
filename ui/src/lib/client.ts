@@ -1,4 +1,4 @@
-import Client from "./bindings";
+import Client, { RequestOpts } from "./bindings";
 
 const client = Client.new({
 	endpoint: "http://localhost:8081/_robin",

@@ -7,12 +7,13 @@ import SplashScreen from "@ui/splash-screen";
 
 import { AuthContext, createDeepSignal } from "./lib/stores";
 import { SignIn, SignUp, Index } from "@routes/index";
+import { Toaster } from "solid-toast";
 
 export default function App() {
-	const [data, { refetch }] = createResource(() => client.queries.whoami(), { name: "whoami", storage: createDeepSignal });
+	const [data, { refetch }] = createResource(() => client.queries.whoami(), { name: "whoami" });
 
 	return (
-		<AuthContext.Provider value={{ username: data()?.data?.username ?? null, isSignedIn: data()?.ok ?? false, refetch }}>
+		<AuthContext.Provider value={{ username: data()?.username ?? null, isSignedIn: !data.loading && !data.error, refetch }}>
 			<Show when={data.loading}>
 				<SplashScreen />
 			</Show>
@@ -24,6 +25,8 @@ export default function App() {
 					<Route path="/sign-up" component={SignUp} />
 				</Router>
 			</Show>
+
+			<Toaster position="top-right" />
 		</AuthContext.Provider>
 	);
 }

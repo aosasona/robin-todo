@@ -16,4 +16,10 @@ export function createDeepSignal<T>(value: T): Signal<T> {
   ] as Signal<T>;
 }
 
-export const AuthContext = createContext<{ username: string | null; isSignedIn: boolean; refetch: () => void }>();
+type AuthContextValue = {
+  username: string | null;
+  isSignedIn: boolean;
+  refetch: () => void;
+};
+
+export const AuthContext = createContext<AuthContextValue>();
