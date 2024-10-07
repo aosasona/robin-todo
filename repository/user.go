@@ -3,6 +3,7 @@ package repository
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	apperrors "todo/pkg/errors"
 
@@ -17,21 +18,13 @@ type User struct {
 	CreatedAt int64  `json:"created_at"`
 }
 
-func (u *User) VerifyPassword(password string) bool {
+func (u *User) VerifyPassword(password string) (bool, error) {
 	return argon2Verify(u.Password, password)
 }
 
 type CreateUserInput struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
-}
-
-func (u *User) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
-		"user_id":    u.UserID,
-		"username":   u.Username,
-		"created_at": u.CreatedAt,
-	})
 }
 
 type userRepository struct {
@@ -45,7 +38,8 @@ type UserRepository interface {
 
 func (r *userRepository) Create(data CreateUserInput) (User, error) {
 	user := User{
-		Username: data.Username,
+		Username:  data.Username,
+		CreatedAt: time.Now().Unix(),
 	}
 
 	hash, err := argon2Hash(data.Password)
@@ -66,7 +60,12 @@ func (r *userRepository) Create(data CreateUserInput) (User, error) {
 			return apperrors.Error{Message: "User already exists", Code: http.StatusConflict}
 		}
 
-		return nil
+		encoded, err := json.Marshal(user)
+		if err != nil {
+			return err
+		}
+
+		return bucket.Put([]byte(data.Username), encoded)
 	})
 	if err != nil {
 		return user, err
@@ -101,7 +100,6 @@ func argon2Hash(password string) ([]byte, error) {
 	return argon.HashEncoded([]byte(password))
 }
 
-func argon2Verify(hash, password string) bool {
-	ok, err := argon2.VerifyEncoded([]byte(password), []byte(hash))
-	return ok && err == nil
+func argon2Verify(hash, password string) (bool, error) {
+	return argon2.VerifyEncoded([]byte(password), []byte(hash))
 }

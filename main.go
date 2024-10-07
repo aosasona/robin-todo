@@ -45,6 +45,7 @@ func main() {
 		CodegenOptions: robin.CodegenOptions{
 			Path:             "./ui/src/lib",
 			GenerateBindings: true,
+			ThrowOnError:     true,
 		},
 		EnableDebugMode: false,
 		ErrorHandler:    apperrors.ErrorHandler,
@@ -59,7 +60,7 @@ func main() {
 
 	i, err := r.
 		// Queries
-		Add(q("whoami", h.Me, h.RequireAuth)).
+		Add(q("whoami", h.WhoAmI, h.RequireAuth)).
 		Add(q("list-todos", h.List, h.RequireAuth)).
 		// Mutations
 		Add(m("sign-in", h.SignIn)).
