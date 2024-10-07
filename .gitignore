@@ -1,0 +1,4 @@
+/tmp
+**/*/tmp
+*.db
+node_modules
