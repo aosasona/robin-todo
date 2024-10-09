@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 
 	"todo/repository"
 
@@ -63,9 +64,9 @@ func (h *handler) SignIn(ctx *robin.Context, data SignInInput) (User, error) {
 		Value:    base64username,
 		HttpOnly: true,
 		Secure:   os.Getenv("ENV") == "production",
-		SameSite: http.SameSiteNoneMode,
+		SameSite: http.SameSiteDefaultMode,
 		Path:     "/",
-		Domain:   "localhost",
+		Expires:  time.Now().Add(7 * 24 * time.Hour), // 7 days
 	}
 	http.SetCookie(ctx.Response(), &cookie)
 
@@ -99,6 +100,20 @@ func (h *handler) SignUp(
 	if err != nil {
 		return robin.Void{}, err
 	}
+
+	return robin.Void{}, nil
+}
+
+func (h *handler) SignOut(ctx *robin.Context, _ robin.Void) (robin.Void, error) {
+	cookie := http.Cookie{
+		Name:     "auth",
+		Value:    "",
+		HttpOnly: true,
+		Secure:   os.Getenv("ENV") == "production",
+		SameSite: http.SameSiteDefaultMode,
+		Expires:  time.Now().Add(-time.Hour),
+	}
+	http.SetCookie(ctx.Response(), &cookie)
 
 	return robin.Void{}, nil
 }
