@@ -25,9 +25,8 @@ func New(repo repository.Repository) *handler {
 }
 
 func (h *handler) RequireAuth(c *robin.Context) error {
-	authCookie, err := c.Request().Cookie("auth")
-	if err != nil {
-		slog.Error("Failed to get auth cookie", slog.String("error", err.Error()))
+	authCookie, found := c.Cookie("auth")
+	if !found {
 		return apperrors.New(http.StatusUnauthorized, "Unauthorized")
 	}
 
