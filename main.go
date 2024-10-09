@@ -65,6 +65,7 @@ func main() {
 		// Mutations
 		Add(m("sign-in", h.SignIn)).
 		Add(m("sign-up", h.SignUp)).
+		Add(m("sign-out", h.SignOut)).
 		Add(m("create-todo", h.Create, h.RequireAuth)).
 		Build()
 	if err != nil {
@@ -75,7 +76,12 @@ func main() {
 		log.Fatalf("Failed to export client: %s", err)
 	}
 
-	if err := i.Serve(); err != nil {
+	if err := i.Serve(robin.ServeOptions{
+		CorsOptions: &robin.CorsOptions{
+			Origins:          []string{"http://localhost:4000"},
+			AllowCredentials: true,
+		},
+	}); err != nil {
 		log.Fatalf("Failed to serve Robin instance: %s", err)
 		return
 	}

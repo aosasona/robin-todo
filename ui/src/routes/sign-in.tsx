@@ -1,14 +1,24 @@
 import Button from "$/components/button";
 import Input from "$/components/input";
 import client from "$/lib/client";
-import { AuthContext } from "$/lib/stores";
+import { useAuthContext } from "@lib/stores/auth";
 import { A, useNavigate } from "@solidjs/router";
-import { useContext } from "solid-js";
+import { createEffect } from "solid-js";
 import toast from "solid-toast";
 
 export default function SignIn() {
-	const ctx = useContext(AuthContext);
+	const auth = useAuthContext();
 	const navigate = useNavigate();
+
+	createEffect(() => {
+		if (!auth?.data.loading && !!auth?.data()?.username) {
+			navigate("/");
+		}
+	});
+
+	if (auth.data.loading) {
+		return null;
+	}
 
 	async function handleSubmit(e: Event) {
 		try {
@@ -22,8 +32,8 @@ export default function SignIn() {
 			const password = data.get("password") as string;
 
 			await client.mutations.signIn({ username, password });
-			ctx?.refetch();
-			// navigate("/");
+			auth.refetch();
+			navigate("/");
 		} catch (e) {
 			toast.error((e as { message: any }).message);
 		}
@@ -31,7 +41,7 @@ export default function SignIn() {
 
 	return (
 		<div class="container w-screen h-screen flex flex-col items-center justify-center">
-			<form class="w-full max-w-md text-left" onSubmit={handleSubmit}>
+			<form class="w-full max-w-sm text-left" onSubmit={handleSubmit}>
 				<h1>Sign In</h1>
 				<p class="text-neutral-200 dark:text-neutral-500 mt-2">Enter your credentials to continue</p>
 

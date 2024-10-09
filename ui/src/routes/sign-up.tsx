@@ -1,11 +1,24 @@
 import Button from "$/components/button";
 import Input from "$/components/input";
 import client from "$/lib/client";
+import { useAuthContext } from "@lib/stores/auth";
 import { A, useNavigate } from "@solidjs/router";
+import { createEffect } from "solid-js";
 import toast from "solid-toast";
 
 export default function SignUp() {
+	const auth = useAuthContext();
 	const navigate = useNavigate();
+
+	createEffect(() => {
+		if (!auth?.data.loading && !!auth?.data()?.username) {
+			navigate("/");
+		}
+	});
+
+	if (auth.data.loading) {
+		return null;
+	}
 
 	async function handleSubmit(e: Event) {
 		try {
@@ -36,7 +49,7 @@ export default function SignUp() {
 
 	return (
 		<div class="container w-screen h-screen flex flex-col items-center justify-center">
-			<form class="w-full max-w-md text-left" onSubmit={handleSubmit}>
+			<form class="w-full max-w-sm text-left" onSubmit={handleSubmit}>
 				<h1>Sign Up</h1>
 				<p class="text-neutral-200 dark:text-neutral-500 mt-2">Fill in the form below to create an account</p>
 

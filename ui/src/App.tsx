@@ -5,15 +5,14 @@ import client from "@lib/client";
 
 import SplashScreen from "@ui/splash-screen";
 
-import { AuthContext, createDeepSignal } from "./lib/stores";
+import { AuthContext } from "@lib/stores/auth";
 import { SignIn, SignUp, Index } from "@routes/index";
 import { Toaster } from "solid-toast";
 
 export default function App() {
 	const [data, { refetch }] = createResource(() => client.queries.whoami(), { name: "whoami" });
-
 	return (
-		<AuthContext.Provider value={{ username: data()?.username ?? null, isSignedIn: !data.loading && !data.error, refetch }}>
+		<AuthContext.Provider value={{ data, refetch }}>
 			<Show when={data.loading}>
 				<SplashScreen />
 			</Show>
