@@ -1,24 +1,22 @@
 import Button from "$/components/button";
 import Input from "$/components/input";
 import client from "$/lib/client";
-import { useAuthContext } from "@lib/stores/auth";
+import { useUserQuery } from "@lib/stores/auth";
 import { A, useNavigate } from "@solidjs/router";
+import { useQueryClient } from "@tanstack/solid-query";
 import { createEffect } from "solid-js";
 import toast from "solid-toast";
 
 export default function SignIn() {
-	const auth = useAuthContext();
+	const queryClient = useQueryClient();
+	const query = useUserQuery();
 	const navigate = useNavigate();
 
 	createEffect(() => {
-		if (!auth?.data.loading && !!auth?.data()?.username) {
+		if (!query.isPending && query.isSuccess && query.data?.username) {
 			navigate("/");
 		}
 	});
-
-	if (auth.data.loading) {
-		return null;
-	}
 
 	async function handleSubmit(e: Event) {
 		try {
@@ -32,8 +30,8 @@ export default function SignIn() {
 			const password = data.get("password") as string;
 
 			await client.mutations.signIn({ username, password });
-			auth.refetch();
-			navigate("/");
+			await queryClient.invalidateQueries({ queryKey: ["whoami"] });
+			navigate("/", { replace: true });
 		} catch (e) {
 			toast.error((e as { message: any }).message);
 		}

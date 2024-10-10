@@ -1,24 +1,20 @@
 import Button from "$/components/button";
 import Input from "$/components/input";
+import { useUserQuery } from "@lib/stores/auth";
 import client from "$/lib/client";
-import { useAuthContext } from "@lib/stores/auth";
 import { A, useNavigate } from "@solidjs/router";
 import { createEffect } from "solid-js";
 import toast from "solid-toast";
 
 export default function SignUp() {
-	const auth = useAuthContext();
+	const query = useUserQuery();
 	const navigate = useNavigate();
 
 	createEffect(() => {
-		if (!auth?.data.loading && !!auth?.data()?.username) {
-			navigate("/");
+		if (!query.isPending && query.isSuccess && query.data?.username) {
+			navigate("/", { replace: true });
 		}
 	});
-
-	if (auth.data.loading) {
-		return null;
-	}
 
 	async function handleSubmit(e: Event) {
 		try {

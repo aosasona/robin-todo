@@ -1,18 +1,15 @@
-import { createContext, Resource, useContext } from "solid-js";
-import { ResultOf, Schema } from "@lib/bindings";
+import { createQuery } from "@tanstack/solid-query";
+import client from "../client";
 
-type AuthContextValue = {
-	data: Resource<ResultOf<Schema, "query", "whoami">>;
-	refetch: () => void;
-};
+export function useUserQuery() {
+	const query = createQuery(() => ({
+		queryKey: ["whoami"],
+		queryFn: () => client.queries.whoami(),
+		refetchOnMount: false,
+		refetchOnReconnect: false,
+		refetchOnWindowFocus: false,
+		retry: false,
+	}));
 
-export function useAuthContext() {
-	const context = useContext(AuthContext);
-	if (!context) {
-		throw new Error("useAuthContext must be used within an AuthContext.Provider");
-	}
-
-	return context;
+	return query;
 }
-
-export const AuthContext = createContext<AuthContextValue>();

@@ -1,21 +1,16 @@
-import { useAuthContext } from "$/lib/stores/auth";
+import { useUserQuery } from "$/lib/stores/auth";
 import { useNavigate } from "@solidjs/router";
 import { createEffect, JSX } from "solid-js";
 
 export default function ProtectedRoute(props: { children: JSX.Element }) {
-	const auth = useAuthContext();
+	const query = useUserQuery();
 	const navigate = useNavigate();
 
 	createEffect(() => {
-		if (auth.data.error || (!auth?.data.loading && !auth?.data()?.username)) {
-			navigate("/sign-in");
+		if (!query.isFetching && query.data?.username === undefined) {
+			navigate("/sign-in", { replace: true });
 		}
 	});
-
-	// If the auth data is still loading, return null to prevent flickering
-	if (auth.data.loading) {
-		return null;
-	}
 
 	return <>{props.children}</>;
 }
