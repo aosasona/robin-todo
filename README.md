@@ -1,5 +1,7 @@
 # Robin tasks
 
+![Screenshot](screenshot.jpeg)
+
 A scrappy and basic task management application using [Solid.js](https://docs.solidjs.com/) and [TanStack Query](https://tanstack.com/query) to demo [robin](https://github.com/aosasona/robin)
 
 ## Running
