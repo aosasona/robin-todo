@@ -16,10 +16,6 @@ type handler struct {
 	repository repository.Repository
 }
 
-type CreateInput struct {
-	Title string `json:"title"`
-}
-
 func New(repo repository.Repository) *handler {
 	return &handler{repository: repo}
 }

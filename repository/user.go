@@ -14,8 +14,8 @@ import (
 type User struct {
 	UserID    int    `json:"user_id"`
 	Username  string `json:"username"`
-	Password  string `json:"password"   mirror:"-"`
-	CreatedAt int64  `json:"created_at"`
+	Password  string `json:"password"  mirror:"-"`
+	CreatedAt int64  `json:"createdAt"`
 }
 
 func (u *User) VerifyPassword(password string) (bool, error) {
