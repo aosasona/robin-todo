@@ -67,6 +67,8 @@ func main() {
 		Add(m("sign-up", h.SignUp)).
 		Add(m("sign-out", h.SignOut)).
 		Add(m("create-todo", h.Create, h.RequireAuth)).
+		Add(m("delete-todo", h.Delete, h.RequireAuth)).
+		Add(m("toggle-completed", h.ToggleCompleted, h.RequireAuth)).
 		Build()
 	if err != nil {
 		log.Fatalf("Failed to build Robin instance: %s", err)
