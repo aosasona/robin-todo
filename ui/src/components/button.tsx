@@ -5,7 +5,7 @@ type Props = ParentProps & JSX.IntrinsicElements["button"];
 
 export default function Button(props: Props) {
 	const defaultClasses =
-		"bg-neuteral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 w-full text-sm py-2 px-6 rounded-md focus:outline-none focus:ring-1 focus:ring-neutral-900 dark:focus:ring-neutral-300";
+		"bg-neuteral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 w-full text-sm py-2 px-6 rounded-md focus:outline-none focus:ring-1 focus:ring-neutral-900 dark:focus:ring-neutral-300 disabled:opacity-50 disabled:cursor-not-allowed";
 
 	const classes = twMerge(defaultClasses, props.class, ...Object.keys(props.classList ?? []));
 

@@ -72,22 +72,50 @@ export type Schema = {
       payload: void;
     };
     "list-todos": {
-      result: Array<string>;
+      result: {
+        complete: Array<{
+          id: number;
+          title: string;
+          description: string;
+          completed: boolean;
+          createdAt: number;
+          lastUpdated: number;
+        }>;
+        incomplete: Array<{
+          id: number;
+          title: string;
+          description: string;
+          completed: boolean;
+          createdAt: number;
+          lastUpdated: number;
+        }>;
+      };
       payload: void;
     };
   };
   mutations: {
-    "sign-out": {
-      result: void;
-      payload: void;
-    };
     "create-todo": {
       result: {
+        id: number;
         title: string;
+        description: string;
+        completed: boolean;
+        createdAt: number;
+        lastUpdated: number;
       };
       payload: {
         title: string;
+        description: string;
+        completed: boolean;
       };
+    };
+    "delete-todo": {
+      result: void;
+      payload: number;
+    };
+    "toggle-completed": {
+      result: void;
+      payload: number;
     };
     "sign-in": {
       result: {
@@ -106,6 +134,10 @@ export type Schema = {
         username: string;
         password: string;
       };
+    };
+    "sign-out": {
+      result: void;
+      payload: void;
     };
   };
 };
@@ -153,16 +185,6 @@ class Mutations<CSchema extends ClientSchema = Schema> {
   constructor(private client: Client<CSchema>) {}
   
   /**
-   * @procedure sign-out
-   *
-   * @returns Promise<ProcedureResult<CSchema, "query", "sign-out">>
-   * @throws {ProcedureCallError} if the procedure call fails
-   **/
-  async signOut(opts?: CallOpts<CSchema, "mutation", "sign-out">): Promise<ProcedureResult<CSchema, "mutation", "sign-out">> {
-    return await this.client.call("mutation", { ...opts, name: "sign-out", payload: undefined });
-  }
-
-  /**
    * @procedure create-todo
    *
    * @returns Promise<ProcedureResult<CSchema, "query", "create-todo">>
@@ -170,6 +192,26 @@ class Mutations<CSchema extends ClientSchema = Schema> {
    **/
   async createTodo(payload: PayloadOf<CSchema, "mutation", "create-todo">, opts?: CallOpts<CSchema, "mutation", "create-todo">): Promise<ProcedureResult<CSchema, "mutation", "create-todo">> {
     return await this.client.call("mutation", { ...opts, name: "create-todo", payload: payload });
+  }
+
+  /**
+   * @procedure delete-todo
+   *
+   * @returns Promise<ProcedureResult<CSchema, "query", "delete-todo">>
+   * @throws {ProcedureCallError} if the procedure call fails
+   **/
+  async deleteTodo(payload: PayloadOf<CSchema, "mutation", "delete-todo">, opts?: CallOpts<CSchema, "mutation", "delete-todo">): Promise<ProcedureResult<CSchema, "mutation", "delete-todo">> {
+    return await this.client.call("mutation", { ...opts, name: "delete-todo", payload: payload });
+  }
+
+  /**
+   * @procedure toggle-completed
+   *
+   * @returns Promise<ProcedureResult<CSchema, "query", "toggle-completed">>
+   * @throws {ProcedureCallError} if the procedure call fails
+   **/
+  async toggleCompleted(payload: PayloadOf<CSchema, "mutation", "toggle-completed">, opts?: CallOpts<CSchema, "mutation", "toggle-completed">): Promise<ProcedureResult<CSchema, "mutation", "toggle-completed">> {
+    return await this.client.call("mutation", { ...opts, name: "toggle-completed", payload: payload });
   }
 
   /**
@@ -190,6 +232,16 @@ class Mutations<CSchema extends ClientSchema = Schema> {
    **/
   async signUp(payload: PayloadOf<CSchema, "mutation", "sign-up">, opts?: CallOpts<CSchema, "mutation", "sign-up">): Promise<ProcedureResult<CSchema, "mutation", "sign-up">> {
     return await this.client.call("mutation", { ...opts, name: "sign-up", payload: payload });
+  }
+
+  /**
+   * @procedure sign-out
+   *
+   * @returns Promise<ProcedureResult<CSchema, "query", "sign-out">>
+   * @throws {ProcedureCallError} if the procedure call fails
+   **/
+  async signOut(opts?: CallOpts<CSchema, "mutation", "sign-out">): Promise<ProcedureResult<CSchema, "mutation", "sign-out">> {
+    return await this.client.call("mutation", { ...opts, name: "sign-out", payload: undefined });
   }
 }
 
