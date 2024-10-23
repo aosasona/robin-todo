@@ -1,4 +1,5 @@
 import toast from "solid-toast";
+import { Accessor } from "solid-js";
 import Input from "./input";
 import Button from "./button";
 import { useQueryClient } from "@tanstack/solid-query";
@@ -8,13 +9,14 @@ import { createEffect, createSignal } from "solid-js";
 import { autofocus } from "@solid-primitives/autofocus";
 import { useKeyDownEvent } from "@solid-primitives/keyboard";
 
+const _autofocus = (element: HTMLElement, f?: Accessor<boolean>) => autofocus(element, f)
+
 type Props = {
 	show: boolean;
 	onClose: () => void;
 	open: () => void;
 };
 
-// TODO: render human-readable date on hover
 export default function TaskModal(props: Props) {
 	const queryClient = useQueryClient();
 
@@ -88,7 +90,7 @@ export default function TaskModal(props: Props) {
 							<h2 class="text-xl font-bold p-4 border-b border-b-neutral-800">Create a new task</h2>
 							<form onSubmit={handleSubmit}>
 								<div class="px-4 py-3 space-y-4">
-									<Input name="title" label="Title" placeholder="Do thing" ref={autofocus} autofocus />
+									<Input name="title" label="Title" placeholder="Do thing" ref={_autofocus} autofocus />
 
 									<textarea
 										name="description"
