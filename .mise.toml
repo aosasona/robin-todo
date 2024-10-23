@@ -1,0 +1,19 @@
+settings.experimental = true
+
+[tools]
+go = "1.23.2"
+watchexec = "1.25.1"
+node = "20.18.0"
+
+[tasks.default]
+description = "Run the project in development mode"
+run = [
+	"go generate ./...",
+	"go run ."
+]
+sources = ['./**/*.go', 'main.go', 'ui/src/**/*.{ts,tsx,js,jsx}']
+
+
+[tasks.generate]
+description = "Generate the UI files"
+run = "go generate ./..."
