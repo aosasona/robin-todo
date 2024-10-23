@@ -65,6 +65,7 @@ func main() {
 		// Queries
 		Add(q("whoami", h.WhoAmI, h.RequireAuth)).
 		Add(q("list-todos", h.List, h.RequireAuth)).
+		Add(q("get-todo", h.Get, h.RequireAuth)).
 		// Mutations
 		Add(m("sign-in", h.SignIn)).
 		Add(m("sign-up", h.SignUp)).

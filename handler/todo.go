@@ -53,6 +53,32 @@ func (h *handler) List(ctx *robin.Context, _ robin.Void) (ListTodoResult, error)
 	return result, nil
 }
 
+func (h *handler) Get(ctx *robin.Context, id int) (repository.Todo, error) {
+	user, ok := ctx.Get("user").(repository.User)
+	if !ok {
+		slog.Error(
+			"failed to get user from context",
+			slog.String("user", fmt.Sprintf("%+v", ctx.Get("user"))),
+		)
+
+		return repository.Todo{}, apperrors.New(
+			http.StatusInternalServerError,
+			"You need to be signed in to get a todo",
+		)
+	}
+
+	todo, err := h.repository.TodoRepo().FindByID(id, user.UserID)
+	if err != nil {
+		slog.Error("failed to fetch todo", slog.String("err", err.Error()))
+		return repository.Todo{}, apperrors.New(
+			http.StatusInternalServerError,
+			"Failed to fetch task",
+		)
+	}
+
+	return todo, nil
+}
+
 func (h *handler) Create(
 	ctx *robin.Context,
 	input repository.CreateTodoInput,

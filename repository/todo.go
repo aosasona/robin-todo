@@ -33,6 +33,7 @@ type CreateTodoInput struct {
 type TodoRepository interface {
 	Create(CreateTodoInput) (Todo, error)
 	FindByUserID(id int) ([]Todo, error)
+	FindByID(id, userID int) (Todo, error)
 	Delete(id, userID int) error
 	ToggleCompleted(id, userID int) error
 }
@@ -60,6 +61,22 @@ func (r *todoRepository) Create(data CreateTodoInput) (Todo, error) {
 
 		recordID := fmt.Sprintf("%d:%d", data.UserID, todo.ID)
 		return tx.Bucket([]byte("todos")).Put([]byte(recordID), b)
+	})
+
+	return todo, err
+}
+
+func (r *todoRepository) FindByID(id, userID int) (Todo, error) {
+	var todo Todo
+
+	err := r.db.View(func(tx *bbolt.Tx) error {
+		key := fmt.Sprintf("%d:%d", userID, id)
+		v := tx.Bucket([]byte("todos")).Get([]byte(key))
+		if v == nil {
+			return fmt.Errorf("Task with id %d not found", id)
+		}
+
+		return json.Unmarshal(v, &todo)
 	})
 
 	return todo, err
