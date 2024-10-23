@@ -3,7 +3,7 @@ settings.experimental = true
 [tools]
 go = "1.23.2"
 watchexec = "1.25.1"
-node = "20.18.0"
+node = "23.0.0"
 
 [tasks.default]
 description = "Run the project in development mode"
@@ -12,6 +12,14 @@ run = [
 	"go run ."
 ]
 sources = ['./**/*.go', 'main.go', 'ui/src/**/*.{ts,tsx,js,jsx}']
+
+[tasks.build]
+description = "Build the project"
+run = [
+	"go generate ./...",
+	"mkdir output",
+	"go build -o output/todo"
+]
 
 
 [tasks.generate]
