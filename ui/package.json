@@ -16,6 +16,7 @@
     "phosphor-solid": "^1.1.5",
     "solid-icons": "^1.1.0",
     "solid-js": "^1.9.1",
+    "solid-markdown": "^2.0.13",
     "solid-toast": "^0.5.0",
     "tailwind-merge": "^2.5.3"
   },

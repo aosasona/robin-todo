@@ -3,12 +3,19 @@
  **/
 
 export type RequestOpts = {
+  // The HTTP method to use for the request
   method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "OPTIONS" | "HEAD";
+
+  // The headers to send with the request
   headers?: Record<string, string>;
+
+  // The body of the request; this should be a JSON string
   body?: string;
 }
 
 export type HttpClientFn = (url: string, opts?: RequestOpts) => Promise<Response>;
+
+export type ExtraFetchOpts = Exclude<RequestInit, "method" | "headers" | "body">;
 
 export type ClientOpts = {
   // The full robin endpoint to connect to (e.g. http://localhost:8080/_robin)
@@ -16,6 +23,12 @@ export type ClientOpts = {
 
   // Optional custom client function to use for making requests
   clientFn?: HttpClientFn;
+
+  /**
+   * Additional fetch options to pass to the underlying fetch API if the default client is being used (e.g. `mode`, `credentials`, etc.)
+   * This will do nothing if a custom client function is provided, set the options there instead
+   **/
+  fetchOpts?: ExtraFetchOpts;
 };
 
 export type ProcedureType = "query" | "mutation";
@@ -63,13 +76,16 @@ export type CallOpts<CSchema extends ClientSchema, PType extends ProcedureType, 
 /** ================ GENERATED SCHEMA ================ **/
 export type Schema = {
   queries: {
-    "whoami": {
+    "get-todo": {
       result: {
-        user_id: number;
-        username: string;
-        created_at: number;
+        id: number;
+        title: string;
+        description: string;
+        completed: boolean;
+        createdAt: number;
+        lastUpdated: number;
       };
-      payload: void;
+      payload: number;
     };
     "list-todos": {
       result: {
@@ -92,11 +108,41 @@ export type Schema = {
       };
       payload: void;
     };
+    "whoami": {
+      result: {
+        user_id: number;
+        username: string;
+        created_at: number;
+      };
+      payload: void;
+    };
   };
   mutations: {
+    "sign-in": {
+      result: {
+        user_id: number;
+        username: string;
+        created_at: number;
+      };
+      payload: {
+        username: string;
+        password: string;
+      };
+    };
+    "sign-up": {
+      result: void;
+      payload: {
+        username: string;
+        password: string;
+      };
+    };
     "sign-out": {
       result: void;
       payload: void;
+    };
+    "toggle-completed": {
+      result: void;
+      payload: number;
     };
     "create-todo": {
       result: {
@@ -117,39 +163,20 @@ export type Schema = {
       result: void;
       payload: number;
     };
-    "toggle-completed": {
-      result: void;
-      payload: number;
-    };
-    "sign-in": {
-      result: {
-        user_id: number;
-        username: string;
-        created_at: number;
-      };
-      payload: {
-        username: string;
-        password: string;
-      };
-    };
-    "sign-up": {
-      result: void;
-      payload: {
-        username: string;
-        password: string;
-      };
-    };
   };
 };
 
 
-// Default client function that uses the fetch API which is available in most environments
-export function defaultClientFn(url: string, opts?: RequestOpts): Promise<Response> {
-  return fetch(url, {
-    method: opts?.method || "GET",
-    headers: opts?.headers || {},
-    body: opts?.body || undefined,
-  });
+// Create a new HTTP client function with the given fetch options
+export function createDefaultHttpClient(fetchOpts: ExtraFetchOpts): HttpClientFn {
+  return async (url: string, opts?: RequestOpts): Promise<Response> => {
+    return fetch(url, {
+      method: opts?.method || "GET",
+      headers: opts?.headers || {},
+      body: opts?.body || undefined,
+      ...fetchOpts,
+    });
+  };
 }
 
 /**
@@ -161,13 +188,13 @@ class Queries<CSchema extends ClientSchema = Schema> {
   constructor(private client: Client<CSchema>) {}
   
   /**
-   * @procedure whoami
+   * @procedure get-todo
    *
-   * @returns Promise<ProcedureResult<CSchema, "query", "whoami">>
+   * @returns Promise<ProcedureResult<CSchema, "query", "get-todo">>
    * @throws {ProcedureCallError} if the procedure call fails
    **/
-  async whoami(opts?: CallOpts<CSchema, "query", "whoami">): Promise<ProcedureResult<CSchema, "query", "whoami">> {
-    return await this.client.call("query", { ...opts, name: "whoami", payload: undefined });
+  async getTodo(payload: PayloadOf<CSchema, "query", "get-todo">, opts?: CallOpts<CSchema, "query", "get-todo">): Promise<ProcedureResult<CSchema, "query", "get-todo">> {
+    return await this.client.call("query", { ...opts, name: "get-todo", payload: payload });
   }
 
   /**
@@ -179,11 +206,41 @@ class Queries<CSchema extends ClientSchema = Schema> {
   async listTodos(opts?: CallOpts<CSchema, "query", "list-todos">): Promise<ProcedureResult<CSchema, "query", "list-todos">> {
     return await this.client.call("query", { ...opts, name: "list-todos", payload: undefined });
   }
+
+  /**
+   * @procedure whoami
+   *
+   * @returns Promise<ProcedureResult<CSchema, "query", "whoami">>
+   * @throws {ProcedureCallError} if the procedure call fails
+   **/
+  async whoami(opts?: CallOpts<CSchema, "query", "whoami">): Promise<ProcedureResult<CSchema, "query", "whoami">> {
+    return await this.client.call("query", { ...opts, name: "whoami", payload: undefined });
+  }
 }
 
 class Mutations<CSchema extends ClientSchema = Schema> {
   constructor(private client: Client<CSchema>) {}
   
+  /**
+   * @procedure sign-in
+   *
+   * @returns Promise<ProcedureResult<CSchema, "query", "sign-in">>
+   * @throws {ProcedureCallError} if the procedure call fails
+   **/
+  async signIn(payload: PayloadOf<CSchema, "mutation", "sign-in">, opts?: CallOpts<CSchema, "mutation", "sign-in">): Promise<ProcedureResult<CSchema, "mutation", "sign-in">> {
+    return await this.client.call("mutation", { ...opts, name: "sign-in", payload: payload });
+  }
+
+  /**
+   * @procedure sign-up
+   *
+   * @returns Promise<ProcedureResult<CSchema, "query", "sign-up">>
+   * @throws {ProcedureCallError} if the procedure call fails
+   **/
+  async signUp(payload: PayloadOf<CSchema, "mutation", "sign-up">, opts?: CallOpts<CSchema, "mutation", "sign-up">): Promise<ProcedureResult<CSchema, "mutation", "sign-up">> {
+    return await this.client.call("mutation", { ...opts, name: "sign-up", payload: payload });
+  }
+
   /**
    * @procedure sign-out
    *
@@ -192,6 +249,16 @@ class Mutations<CSchema extends ClientSchema = Schema> {
    **/
   async signOut(opts?: CallOpts<CSchema, "mutation", "sign-out">): Promise<ProcedureResult<CSchema, "mutation", "sign-out">> {
     return await this.client.call("mutation", { ...opts, name: "sign-out", payload: undefined });
+  }
+
+  /**
+   * @procedure toggle-completed
+   *
+   * @returns Promise<ProcedureResult<CSchema, "query", "toggle-completed">>
+   * @throws {ProcedureCallError} if the procedure call fails
+   **/
+  async toggleCompleted(payload: PayloadOf<CSchema, "mutation", "toggle-completed">, opts?: CallOpts<CSchema, "mutation", "toggle-completed">): Promise<ProcedureResult<CSchema, "mutation", "toggle-completed">> {
+    return await this.client.call("mutation", { ...opts, name: "toggle-completed", payload: payload });
   }
 
   /**
@@ -213,36 +280,6 @@ class Mutations<CSchema extends ClientSchema = Schema> {
   async deleteTodo(payload: PayloadOf<CSchema, "mutation", "delete-todo">, opts?: CallOpts<CSchema, "mutation", "delete-todo">): Promise<ProcedureResult<CSchema, "mutation", "delete-todo">> {
     return await this.client.call("mutation", { ...opts, name: "delete-todo", payload: payload });
   }
-
-  /**
-   * @procedure toggle-completed
-   *
-   * @returns Promise<ProcedureResult<CSchema, "query", "toggle-completed">>
-   * @throws {ProcedureCallError} if the procedure call fails
-   **/
-  async toggleCompleted(payload: PayloadOf<CSchema, "mutation", "toggle-completed">, opts?: CallOpts<CSchema, "mutation", "toggle-completed">): Promise<ProcedureResult<CSchema, "mutation", "toggle-completed">> {
-    return await this.client.call("mutation", { ...opts, name: "toggle-completed", payload: payload });
-  }
-
-  /**
-   * @procedure sign-in
-   *
-   * @returns Promise<ProcedureResult<CSchema, "query", "sign-in">>
-   * @throws {ProcedureCallError} if the procedure call fails
-   **/
-  async signIn(payload: PayloadOf<CSchema, "mutation", "sign-in">, opts?: CallOpts<CSchema, "mutation", "sign-in">): Promise<ProcedureResult<CSchema, "mutation", "sign-in">> {
-    return await this.client.call("mutation", { ...opts, name: "sign-in", payload: payload });
-  }
-
-  /**
-   * @procedure sign-up
-   *
-   * @returns Promise<ProcedureResult<CSchema, "query", "sign-up">>
-   * @throws {ProcedureCallError} if the procedure call fails
-   **/
-  async signUp(payload: PayloadOf<CSchema, "mutation", "sign-up">, opts?: CallOpts<CSchema, "mutation", "sign-up">): Promise<ProcedureResult<CSchema, "mutation", "sign-up">> {
-    return await this.client.call("mutation", { ...opts, name: "sign-up", payload: payload });
-  }
 }
 
 /** ==================== CLIENT ==================== **/
@@ -259,7 +296,7 @@ class Client<CSchema extends ClientSchema = Schema> {
     }
 
     this.endpoint = opts.endpoint;
-    this.clientFn = opts.clientFn || defaultClientFn;
+    this.clientFn = opts.clientFn || createDefaultHttpClient(opts.fetchOpts || {});
 
     this.queries = new Queries<CSchema>(this);
     this.mutations = new Mutations<CSchema>(this);

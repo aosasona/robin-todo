@@ -38,7 +38,7 @@ a {
 	text-decoration: none;
 
 	&:hover {
-		@apply underline underline-offset-4 transition-all opacity-75;
+		@apply underline underline-offset-2 transition-all opacity-75;
 	}
 }
 
