@@ -12,7 +12,7 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
 	github.com/matthewhartstonge/argon2 v1.0.1 // indirect
 	go.trulyao.dev/mirror/v2 v2.7.1 // indirect
-	go.trulyao.dev/robin v0.3.4 // indirect
+	go.trulyao.dev/robin v0.3.5 // indirect
 	golang.org/x/crypto v0.28.0 // indirect
 	golang.org/x/sys v0.26.0 // indirect
 	golang.org/x/text v0.19.0 // indirect
