@@ -3,9 +3,12 @@ package main
 // This demo does not represent a production-ready application nor best practices, this is simply for demonstration purposes.
 import (
 	"log"
+	"log/slog"
+	"net/http"
 
 	"todo/handler"
 	"todo/repository"
+	"todo/ui"
 
 	apperrors "todo/pkg/errors"
 
@@ -78,14 +81,13 @@ func main() {
 		log.Fatalf("Failed to export client: %s", err)
 	}
 
-	if err := i.Serve(robin.ServeOptions{
-		CorsOptions: &robin.CorsOptions{
-			Origins:          []string{"http://localhost:4000"},
-			AllowCredentials: true,
-		},
-	}); err != nil {
+	mux := http.NewServeMux()
+	mux.HandleFunc("POST /_robin", i.Handler())
+	mux.HandleFunc("/", ui.ServeSPA)
+
+	slog.Info("Listening on :8081")
+	if err := http.ListenAndServe(":8081", mux); err != nil {
 		log.Fatalf("Failed to serve Robin instance: %s", err)
-		return
 	}
 }
 

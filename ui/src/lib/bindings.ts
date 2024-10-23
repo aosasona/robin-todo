@@ -94,6 +94,10 @@ export type Schema = {
     };
   };
   mutations: {
+    "sign-out": {
+      result: void;
+      payload: void;
+    };
     "create-todo": {
       result: {
         id: number;
@@ -134,10 +138,6 @@ export type Schema = {
         username: string;
         password: string;
       };
-    };
-    "sign-out": {
-      result: void;
-      payload: void;
     };
   };
 };
@@ -184,6 +184,16 @@ class Queries<CSchema extends ClientSchema = Schema> {
 class Mutations<CSchema extends ClientSchema = Schema> {
   constructor(private client: Client<CSchema>) {}
   
+  /**
+   * @procedure sign-out
+   *
+   * @returns Promise<ProcedureResult<CSchema, "query", "sign-out">>
+   * @throws {ProcedureCallError} if the procedure call fails
+   **/
+  async signOut(opts?: CallOpts<CSchema, "mutation", "sign-out">): Promise<ProcedureResult<CSchema, "mutation", "sign-out">> {
+    return await this.client.call("mutation", { ...opts, name: "sign-out", payload: undefined });
+  }
+
   /**
    * @procedure create-todo
    *
@@ -232,16 +242,6 @@ class Mutations<CSchema extends ClientSchema = Schema> {
    **/
   async signUp(payload: PayloadOf<CSchema, "mutation", "sign-up">, opts?: CallOpts<CSchema, "mutation", "sign-up">): Promise<ProcedureResult<CSchema, "mutation", "sign-up">> {
     return await this.client.call("mutation", { ...opts, name: "sign-up", payload: payload });
-  }
-
-  /**
-   * @procedure sign-out
-   *
-   * @returns Promise<ProcedureResult<CSchema, "query", "sign-out">>
-   * @throws {ProcedureCallError} if the procedure call fails
-   **/
-  async signOut(opts?: CallOpts<CSchema, "mutation", "sign-out">): Promise<ProcedureResult<CSchema, "mutation", "sign-out">> {
-    return await this.client.call("mutation", { ...opts, name: "sign-out", payload: undefined });
   }
 }
 
