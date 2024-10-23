@@ -5,6 +5,8 @@ import (
 	"log"
 	"log/slog"
 	"net/http"
+	"os"
+	"strings"
 
 	"todo/handler"
 	"todo/repository"
@@ -50,8 +52,7 @@ func main() {
 			GenerateBindings: true,
 			ThrowOnError:     true,
 		},
-		EnableDebugMode: false,
-		ErrorHandler:    apperrors.ErrorHandler,
+		ErrorHandler: apperrors.ErrorHandler,
 	})
 	if err != nil {
 		log.Fatalf("Failed to create a new Robin instance: %s", err)
@@ -82,12 +83,46 @@ func main() {
 		log.Fatalf("Failed to export client: %s", err)
 	}
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("POST /_robin", i.Handler())
-	mux.HandleFunc("/", ui.ServeSPA)
+	serve(i.Handler())
+}
 
-	slog.Info("Listening on :8081")
-	if err := http.ListenAndServe(":8081", mux); err != nil {
+func serve(handler http.HandlerFunc) {
+	// Check if it is using `go run ...` in development mode
+	isDev := strings.HasPrefix(os.Args[0], os.TempDir()) || strings.Contains(os.Args[0], "tmp")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8081"
+	}
+
+	corsOpts := &robin.CorsOptions{
+		Origins:          []string{"http://localhost:5173"},
+		AllowCredentials: true,
+	}
+
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("POST /_robin", func(w http.ResponseWriter, r *http.Request) {
+		if isDev {
+			robin.CorsHandler(w, corsOpts)
+		}
+		handler(w, r)
+	})
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "OPTIONS" && isDev {
+			robin.PreflightHandler(w, corsOpts)
+			return
+		}
+
+		ui.ServeSPA(w, r)
+	})
+
+	if isDev {
+		slog.Info("🔒 CORS enabled for development")
+	}
+
+	slog.Info("📡 Listening on :" + port)
+	if err := http.ListenAndServe(":"+port, mux); err != nil {
 		log.Fatalf("Failed to serve Robin instance: %s", err)
 	}
 }
