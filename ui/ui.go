@@ -8,7 +8,8 @@ import (
 	"strings"
 )
 
-//go:generate pnpm build
+//go:generate pnpm i
+//go:generate npm run build
 //go:embed all:dist/*
 var uiFS embed.FS
 
@@ -32,10 +33,9 @@ func ServeSPA(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "text/html")
-		w.Write(rawIndex)
+		_, _ = w.Write(rawIndex)
 		return
 	}
 
 	handler().ServeHTTP(w, r)
-	return
 }

@@ -1,0 +1,36 @@
+# flyctl launch added from .gitignore
+tmp
+**/**/*/tmp
+**/*.db
+**/node_modules
+output
+
+# flyctl launch added from ui/.gitignore
+# Logs
+ui/**/logs
+ui/**/*.log
+ui/**/npm-debug.log*
+ui/**/yarn-debug.log*
+ui/**/yarn-error.log*
+ui/**/pnpm-debug.log*
+ui/**/lerna-debug.log*
+
+ui/**/node_modules
+ui/**/dist
+ui/**/dist-ssr
+ui/**/*.local
+
+# Editor directories and files
+ui/**/.vscode/*
+!ui/**/.vscode/extensions.json
+ui/**/.idea
+ui/**/.DS_Store
+ui/**/*.suo
+ui/**/*.ntvs*
+ui/**/*.njsproj
+ui/**/*.sln
+ui/**/*.sw?
+
+# flyctl launch added from ui/node_modules/.pnpm/tailwindcss@3.4.13/node_modules/tailwindcss/stubs/.gitignore
+!ui/node_modules/.pnpm/tailwindcss@3.4.13/node_modules/tailwindcss/stubs/**/*
+fly.toml
