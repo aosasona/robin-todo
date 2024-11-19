@@ -76,16 +76,13 @@ export type CallOpts<CSchema extends ClientSchema, PType extends ProcedureType, 
 /** ================ GENERATED SCHEMA ================ **/
 export type Schema = {
   queries: {
-    "get-todo": {
+    "whoami": {
       result: {
-        id: number;
-        title: string;
-        description: string;
-        completed: boolean;
-        createdAt: number;
-        lastUpdated: number;
+        user_id: number;
+        username: string;
+        created_at: number;
       };
-      payload: number;
+      payload: void;
     };
     "list-todos": {
       result: {
@@ -108,13 +105,16 @@ export type Schema = {
       };
       payload: void;
     };
-    "whoami": {
+    "get-todo": {
       result: {
-        user_id: number;
-        username: string;
-        created_at: number;
+        id: number;
+        title: string;
+        description: string;
+        completed: boolean;
+        createdAt: number;
+        lastUpdated: number;
       };
-      payload: void;
+      payload: number;
     };
   };
   mutations: {
@@ -140,10 +140,6 @@ export type Schema = {
       result: void;
       payload: void;
     };
-    "toggle-completed": {
-      result: void;
-      payload: number;
-    };
     "create-todo": {
       result: {
         id: number;
@@ -160,6 +156,10 @@ export type Schema = {
       };
     };
     "delete-todo": {
+      result: void;
+      payload: number;
+    };
+    "toggle-completed": {
       result: void;
       payload: number;
     };
@@ -188,13 +188,13 @@ class Queries<CSchema extends ClientSchema = Schema> {
   constructor(private client: Client<CSchema>) {}
   
   /**
-   * @procedure get-todo
+   * @procedure whoami
    *
-   * @returns Promise<ProcedureResult<CSchema, "query", "get-todo">>
+   * @returns Promise<ProcedureResult<CSchema, "query", "whoami">>
    * @throws {ProcedureCallError} if the procedure call fails
    **/
-  async getTodo(payload: PayloadOf<CSchema, "query", "get-todo">, opts?: CallOpts<CSchema, "query", "get-todo">): Promise<ProcedureResult<CSchema, "query", "get-todo">> {
-    return await this.client.call("query", { ...opts, name: "get-todo", payload: payload });
+  async whoami(opts?: CallOpts<CSchema, "query", "whoami">): Promise<ProcedureResult<CSchema, "query", "whoami">> {
+    return await this.client.call("query", { ...opts, name: "whoami", payload: undefined });
   }
 
   /**
@@ -208,13 +208,13 @@ class Queries<CSchema extends ClientSchema = Schema> {
   }
 
   /**
-   * @procedure whoami
+   * @procedure get-todo
    *
-   * @returns Promise<ProcedureResult<CSchema, "query", "whoami">>
+   * @returns Promise<ProcedureResult<CSchema, "query", "get-todo">>
    * @throws {ProcedureCallError} if the procedure call fails
    **/
-  async whoami(opts?: CallOpts<CSchema, "query", "whoami">): Promise<ProcedureResult<CSchema, "query", "whoami">> {
-    return await this.client.call("query", { ...opts, name: "whoami", payload: undefined });
+  async getTodo(payload: PayloadOf<CSchema, "query", "get-todo">, opts?: CallOpts<CSchema, "query", "get-todo">): Promise<ProcedureResult<CSchema, "query", "get-todo">> {
+    return await this.client.call("query", { ...opts, name: "get-todo", payload: payload });
   }
 }
 
@@ -252,16 +252,6 @@ class Mutations<CSchema extends ClientSchema = Schema> {
   }
 
   /**
-   * @procedure toggle-completed
-   *
-   * @returns Promise<ProcedureResult<CSchema, "query", "toggle-completed">>
-   * @throws {ProcedureCallError} if the procedure call fails
-   **/
-  async toggleCompleted(payload: PayloadOf<CSchema, "mutation", "toggle-completed">, opts?: CallOpts<CSchema, "mutation", "toggle-completed">): Promise<ProcedureResult<CSchema, "mutation", "toggle-completed">> {
-    return await this.client.call("mutation", { ...opts, name: "toggle-completed", payload: payload });
-  }
-
-  /**
    * @procedure create-todo
    *
    * @returns Promise<ProcedureResult<CSchema, "query", "create-todo">>
@@ -279,6 +269,16 @@ class Mutations<CSchema extends ClientSchema = Schema> {
    **/
   async deleteTodo(payload: PayloadOf<CSchema, "mutation", "delete-todo">, opts?: CallOpts<CSchema, "mutation", "delete-todo">): Promise<ProcedureResult<CSchema, "mutation", "delete-todo">> {
     return await this.client.call("mutation", { ...opts, name: "delete-todo", payload: payload });
+  }
+
+  /**
+   * @procedure toggle-completed
+   *
+   * @returns Promise<ProcedureResult<CSchema, "query", "toggle-completed">>
+   * @throws {ProcedureCallError} if the procedure call fails
+   **/
+  async toggleCompleted(payload: PayloadOf<CSchema, "mutation", "toggle-completed">, opts?: CallOpts<CSchema, "mutation", "toggle-completed">): Promise<ProcedureResult<CSchema, "mutation", "toggle-completed">> {
+    return await this.client.call("mutation", { ...opts, name: "toggle-completed", payload: payload });
   }
 }
 

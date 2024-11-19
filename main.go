@@ -16,12 +16,18 @@ import (
 
 	"go.etcd.io/bbolt"
 	"go.trulyao.dev/robin"
-	"go.trulyao.dev/robin/types"
-	_ "go.trulyao.dev/seer"
 )
 
 func initDB() *bbolt.DB {
-	db, err := bbolt.Open("todos.db", 0o600, nil)
+	// Create a data directory if it does not exist
+	if _, err := os.Stat("data"); os.IsNotExist(err) {
+		if err := os.Mkdir("data", 0o755); err != nil {
+			log.Fatalf("Failed to create data directory: %s", err)
+		}
+	}
+
+	// Initialize BoltDB
+	db, err := bbolt.Open("data/todos.db", 0o600, nil)
 	if err != nil {
 		log.Fatalf("Failed to open BoltDB: %s", err)
 	}
@@ -62,18 +68,20 @@ func main() {
 	repo := repository.New(db)
 	h := handler.New(repo)
 
+	r.Use("require-auth", h.RequireAuth)
+
 	i, err := r.
 		// Queries
-		Add(q("whoami", h.WhoAmI, h.RequireAuth)).
-		Add(q("list-todos", h.List, h.RequireAuth)).
-		Add(q("get-todo", h.Get, h.RequireAuth)).
+		Add(robin.Q("whoami", h.WhoAmI)).
+		Add(robin.Q("list-todos", h.List)).
+		Add(robin.Q("get-todo", h.Get)).
 		// Mutations
-		Add(m("sign-in", h.SignIn)).
-		Add(m("sign-up", h.SignUp)).
-		Add(m("sign-out", h.SignOut)).
-		Add(m("create-todo", h.Create, h.RequireAuth)).
-		Add(m("delete-todo", h.Delete, h.RequireAuth)).
-		Add(m("toggle-completed", h.ToggleCompleted, h.RequireAuth)).
+		Add(robin.M("sign-in", h.SignIn).ExcludeMiddleware("require-auth")).
+		Add(robin.M("sign-up", h.SignUp).ExcludeMiddleware("require-auth")).
+		Add(robin.M("sign-out", h.SignOut).ExcludeMiddleware("require-auth")).
+		Add(robin.M("create-todo", h.Create)).
+		Add(robin.M("delete-todo", h.Delete)).
+		Add(robin.M("toggle-completed", h.ToggleCompleted)).
 		Build()
 	if err != nil {
 		log.Fatalf("Failed to build Robin instance: %s", err)
@@ -125,20 +133,4 @@ func serve(handler http.HandlerFunc) {
 	if err := http.ListenAndServe(":"+port, mux); err != nil {
 		log.Fatalf("Failed to serve Robin instance: %s", err)
 	}
-}
-
-func q[T, K any](
-	name string,
-	handler robin.QueryFn[T, K],
-	middlewares ...types.Middleware,
-) robin.Procedure {
-	return robin.Query(name, handler).WithMiddleware(middlewares...)
-}
-
-func m[T, K any](
-	name string,
-	handler robin.MutationFn[T, K],
-	middlewares ...types.Middleware,
-) robin.Procedure {
-	return robin.Mutation(name, handler).WithMiddleware(middlewares...)
 }
